@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html lang="ru" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>main &#8212; документация Lab.work 8 0.0.1</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=61cd365c" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=ba58aea8"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=29b1f277"></script>
+    <link rel="index" title="Алфавитный указатель" href="../genindex.html" />
+    <link rel="search" title="Поиск" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Исходный код main</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Разработать фрагмент программы, позволяющий получать данные о текущих курсах валют с сайта Центробанка РФ с использованием сервиса, который они предоставляют.</span>
+
+<span class="sd">https://cbr.ru/development/</span>
+<span class="sd">http://www.cbr.ru/scripts/XML_daily.asp</span>
+
+<span class="sd">https://digitology.tech/docs/python_3/tutorial/floatingpoint.html</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">xml.etree</span> <span class="kn">import</span> <span class="n">ElementTree</span> <span class="k">as</span> <span class="n">ET</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<div class="viewcode-block" id="get_currencies">
+<a class="viewcode-back" href="../main.html#main.get_currencies">[документация]</a>
+<span class="k">def</span> <span class="nf">get_currencies</span><span class="p">(</span><span class="n">currencies_ids_lst</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    Получает данные о текущих курсах валют с сайта Центробанка РФ.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">    - currencies_ids_lst (list): Список идентификаторов валют.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - list: Список словарей с данными о валютах.</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+  
+    <span class="n">cur_res_str</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;http://www.cbr.ru/scripts/XML_daily.asp&#39;</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">cur_res_str</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">cur_res_str</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        <span class="n">valutes</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;Valute&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">_v</span> <span class="ow">in</span> <span class="n">valutes</span><span class="p">:</span>
+            <span class="n">valute_id</span> <span class="o">=</span> <span class="n">_v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ID&#39;</span><span class="p">)</span>
+            <span class="n">valute</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">valute_id</span><span class="p">)</span> <span class="ow">in</span> <span class="n">currencies_ids_lst</span><span class="p">:</span>
+                <span class="n">valute_cur_name</span> <span class="o">=</span> <span class="n">_v</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;Name&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+                <span class="n">valute_cur_val</span> <span class="o">=</span> <span class="n">_v</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;Value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+                <span class="n">valute_charcode</span> <span class="o">=</span> <span class="n">_v</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;CharCode&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+                <span class="n">valute_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">valute_cur_name</span><span class="p">,</span> <span class="n">valute_cur_val</span><span class="p">)</span>
+              
+                <span class="n">nominal</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_v</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;Nominal&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">nominal</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                  <span class="n">valute_data</span> <span class="o">+=</span> <span class="p">(</span><span class="n">nominal</span><span class="p">,)</span>
+
+                <span class="n">valute</span><span class="p">[</span><span class="n">valute_charcode</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">valute_data</span><span class="p">)</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">valute</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ошибка при получении данных о курсах валют&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="CurrenciesLst">
+<a class="viewcode-back" href="../main.html#main.CurrenciesLst">[документация]</a>
+<span class="k">class</span> <span class="nc">CurrenciesLst</span><span class="p">:</span>
+
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  </span>
+<span class="sd">  Класс для работы с информацией о курсах валют.</span>
+<span class="sd">  </span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">      </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      </span>
+<span class="sd">      Инициализация класса CurrenciesLst.</span>
+<span class="sd">      </span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_valutes</span> <span class="o">=</span> <span class="p">{}</span>  
+      <span class="bp">self</span><span class="o">.</span><span class="n">_tracked_currencies</span> <span class="o">=</span> <span class="p">[]</span>  
+      <span class="bp">self</span><span class="o">.</span><span class="n">_last_updated</span> <span class="o">=</span> <span class="kc">None</span> 
+
+  <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="c1"># Деструктор класса</span>
+      <span class="k">pass</span>  
+
+<div class="viewcode-block" id="CurrenciesLst.get_currencies">
+<a class="viewcode-back" href="../main.html#main.CurrenciesLst.get_currencies">[документация]</a>
+  <span class="k">def</span> <span class="nf">get_currencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currencies_ids_lst</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    Получает данные о текущих курсах валют и сохраняет их в объекте класса.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">    - currencies_ids_lst (list): Список идентификаторов валют.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">cur_res_str</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;http://www.cbr.ru/scripts/XML_daily.asp&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cur_res_str</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">cur_res_str</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        <span class="n">valutes</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;Valute&quot;</span><span class="p">)</span>
+      
+
+        <span class="k">for</span> <span class="n">_v</span> <span class="ow">in</span> <span class="n">valutes</span><span class="p">:</span>
+            <span class="n">valute_id</span> <span class="o">=</span> <span class="n">_v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ID&#39;</span><span class="p">)</span>
+            <span class="n">valute</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="k">if</span> <span class="n">valute_id</span> <span class="ow">in</span> <span class="n">currencies_ids_lst</span><span class="p">:</span>  <span class="c1"># Проверяем, присутствует ли ID в списке, если нет - пропускаем</span>
+                <span class="n">valute_cur_name</span> <span class="o">=</span> <span class="n">_v</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;Name&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+                <span class="n">valute_cur_val</span> <span class="o">=</span> <span class="n">_v</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;Value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+                <span class="n">valute_charcode</span> <span class="o">=</span> <span class="n">_v</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;CharCode&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+
+                <span class="n">nominal</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_v</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;Nominal&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                <span class="n">valute_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">valute_cur_name</span><span class="p">,)</span>
+
+                <span class="k">if</span> <span class="n">valute_cur_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                  <span class="n">valute_value_parts</span> <span class="o">=</span> <span class="n">valute_cur_val</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                  <span class="n">int_part</span> <span class="o">=</span> <span class="n">valute_value_parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                  <span class="n">fract_part</span> <span class="o">=</span> <span class="n">valute_value_parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valute_value_parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;0&#39;</span>
+                  <span class="n">valute_data</span> <span class="o">+=</span> <span class="p">(</span><span class="n">int_part</span><span class="p">,</span> <span class="n">fract_part</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                  <span class="n">valute_value_parts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">nominal</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">valute_data</span> <span class="o">+=</span> <span class="p">(</span><span class="n">nominal</span><span class="p">,)</span>
+
+                <span class="n">valute</span><span class="p">[</span><span class="n">valute_charcode</span><span class="p">]</span> <span class="o">=</span> <span class="n">valute_data</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_valutes</span><span class="p">[</span><span class="n">valute_charcode</span><span class="p">]</span> <span class="o">=</span> <span class="n">valute</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_updated</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span></div>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">valutes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valutes</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">tracked_currencies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tracked_currencies</span>
+
+  <span class="nd">@tracked_currencies</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span> <span class="nf">tracked_currencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currencies</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_tracked_currencies</span> <span class="o">=</span> <span class="n">currencies</span>
+
+<div class="viewcode-block" id="CurrenciesLst.plot_currencies">
+<a class="viewcode-back" href="../main.html#main.CurrenciesLst.plot_currencies">[документация]</a>
+  <span class="k">def</span> <span class="nf">plot_currencies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    Строит график текущих курсов валют на основе данных, хранящихся в объекте класса.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valutes</span><span class="p">:</span>
+        <span class="n">currencies</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_valutes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>  <span class="c1"># Используем CharCode</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">valute_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valutes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">valute_data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">))</span> <span class="k">if</span> <span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="mf">0.0</span>
+                <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">currencies</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Валюта&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Значение&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;График курсов валют&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;currencies.jpg&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Нет данных о курсах валют для построения графика.&quot;</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+  <span class="n">currency_list</span> <span class="o">=</span> <span class="n">CurrenciesLst</span><span class="p">()</span>
+
+  <span class="n">currency_list</span><span class="o">.</span><span class="n">get_currencies</span><span class="p">([</span><span class="s1">&#39;R01035&#39;</span><span class="p">,</span> <span class="s1">&#39;R01335&#39;</span><span class="p">,</span> <span class="s1">&#39;R01700J&#39;</span><span class="p">])</span>
+
+  <span class="k">if</span> <span class="n">currency_list</span><span class="o">.</span><span class="n">valutes</span><span class="p">:</span> 
+      <span class="n">currency_list</span><span class="o">.</span><span class="n">plot_currencies</span><span class="p">()</span>
+  <span class="k">else</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Данные о курсах валют отсутствуют или не удалось получить.&quot;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Lab.work 8</a></h1>
+
+
+
+
+
+
+
+
+<h3>Навигация</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../main.html">Main Module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Код модуля</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Быстрый поиск</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Искать" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Vasileva Marina.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.3.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
