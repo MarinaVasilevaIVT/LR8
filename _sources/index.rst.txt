@@ -8,9 +8,9 @@ Welcome to Lab.work 8's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
-
-   main
+   
+   main_module
+   currencies_lst
 
 Indices and tables
 ==================
